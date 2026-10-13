@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0E7C7B">
+<title>SafeSpot Circle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F4F7F8;--card:#fff;--ink:#12262B;--muted:#5B7076;--line:#D5E0E3;--teal:#0E7C7B;--amber:#F2A33A;--red:#D64545;--map:#E7EFF1;--road:#fff;--soft:#E3F2F1;--redsoft:#FBE9E9;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0C181B;--card:#16282D;--ink:#E8F1F3;--muted:#93A8AE;--line:#2A4148;--map:#1B2E33;--road:#27424A;--soft:#12383A;--redsoft:#3B1D20}}
+:root[data-theme="dark"]{--bg:#0C181B;--card:#16282D;--ink:#E8F1F3;--muted:#93A8AE;--line:#2A4148;--map:#1B2E33;--road:#27424A;--soft:#12383A;--redsoft:#3B1D20}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--ink);font-family:Figtree,system-ui,sans-serif;display:flex;justify-content:center}
+#app{width:100%;max-width:480px;height:100%;display:flex;flex-direction:column;background:var(--bg);position:relative;overflow:hidden}
+header{padding:14px 20px 8px;display:flex;align-items:center;justify-content:space-between}
+header b{font-size:20px;font-weight:800}
+header span{font-size:12px;color:var(--muted);font-weight:600}
+main{flex:1;overflow-y:auto;padding:4px 20px 16px;min-height:0}
+.view{display:none}.view.on{display:block}
+h2{font-size:22px;margin:6px 0 4px;font-weight:800;line-height:1.15}
+p{margin:0 0 10px;color:var(--muted);font-size:14px;line-height:1.45}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:14px;margin-bottom:12px}
+.lbl{font-size:13px;font-weight:700;margin:12px 0 6px}
+.chips{display:flex;gap:8px;flex-wrap:wrap}
+.chip{border:1.5px solid var(--line);background:var(--card);color:var(--ink);border-radius:99px;padding:8px 14px;font:inherit;font-weight:700;font-size:13px}
+.chip.sel{border-color:var(--teal);color:var(--teal);background:var(--soft)}
+.btn{width:100%;border:0;border-radius:16px;padding:16px;font:inherit;font-weight:800;font-size:16px;background:var(--teal);color:#fff;margin-top:8px}
+.btn.red{background:var(--red)}
+.btn.ghost{background:transparent;color:var(--ink);border:1.5px solid var(--line)}
+.map{border-radius:20px;overflow:hidden;background:var(--map);border:1px solid var(--line);margin-bottom:12px}
+.map svg{display:block;width:100%;height:auto}
+.pill{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:700;border-radius:99px;padding:7px 12px;background:var(--soft);color:var(--teal);margin-bottom:10px}
+.pill.red{background:var(--redsoft);color:var(--red)}
+.dot{width:9px;height:9px;border-radius:50%;background:currentColor;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.35}}
+.row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px solid var(--line);font-weight:700;font-size:15px}
+.row:last-child{border:0}
+.row small{display:block;color:var(--muted);font-weight:500;font-size:13px}
+.av{width:40px;height:40px;border-radius:50%;background:var(--soft);color:var(--teal);display:grid;place-items:center;font-weight:800;flex:none}
+.av.amber{background:#FDF0DA;color:#9A5B05}
+.r{margin-left:auto;font-size:13px;color:var(--teal);font-weight:800;text-align:right}
+.alert{background:var(--red);color:#fff;border-radius:18px;padding:16px;margin-bottom:12px}
+.alert p{color:#fff;opacity:.95;margin:4px 0 0}
+.alert b{font-size:18px}
+.big{font-size:44px;font-weight:800;color:var(--red)}
+nav{display:flex;border-top:1px solid var(--line);background:var(--card);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}
+nav button{flex:1;border:0;background:none;font:inherit;font-size:12px;font-weight:700;color:var(--muted);padding:6px 0;display:flex;flex-direction:column;align-items:center;gap:2px}
+nav button i{font-style:normal;font-size:20px}
+nav button.on{color:var(--teal)}
+#ask{position:absolute;inset:0;background:var(--bg);z-index:10;display:none;flex-direction:column;padding:60px 24px 28px;text-align:center}
+#ask.on{display:flex}
+.ring{width:170px;height:170px;border-radius:50%;border:9px solid var(--red);margin:24px auto;display:grid;place-items:center;font-size:62px;font-weight:800;color:var(--red)}
+#ask .spacer{flex:1}
+#toast{position:absolute;left:16px;right:16px;top:calc(10px + env(safe-area-inset-top,0px));background:var(--ink);color:var(--bg);border-radius:14px;padding:12px 14px;font-weight:700;font-size:14px;z-index:20;transform:translateY(-140%);transition:transform .3s}
+#toast.on{transform:none}
+@media (prefers-reduced-motion:reduce){.dot{animation:none}#toast{transition:none}}
+</style>
+</head>
+<body>
+<div id="app">
+  <div id="toast"></div>
+  <header><b>SafeSpot Circle</b><span id="hdr">Ready</span></header>
+  <main>
+    <!-- WALK -->
+    <section class="view on" id="v-walk">
+      <div id="walk-top"></div>
+      <div class="map"><svg id="map" viewBox="0 0 300 330" role="img" aria-label="Live route map">
+        <path d="M0 270H300M30 0V330M140 0V330M0 200H300M0 110H300M260 0V330" stroke="var(--road)" stroke-width="11" fill="none"/>
+        <circle id="rad" cx="0" cy="0" r="70" fill="#D64545" fill-opacity=".12" stroke="#D64545" stroke-dasharray="4 4" style="display:none"/>
+        <path id="rt" d="M30 290V200H140V110H260V60" stroke="var(--line)" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <path id="rtd" d="M30 290V200H140V110H260V60" stroke="#0E7C7B" stroke-width="6" fill="none" stroke-linecap="round"/>
+        <g id="pins"></g>
+        <circle id="me" r="9" fill="#0E7C7B" stroke="#fff" stroke-width="3"/>
+        <text x="258" y="46" font-size="11" font-weight="700" text-anchor="middle" fill="var(--muted)">Gate 4</text>
+      </svg></div>
+      <div id="walk-ctl"></div>
+    </section>
+    <!-- SPOTS -->
+    <section class="view" id="v-spots">
+      <h2>Safe Spots near you</h2>
+      <p>Trusted shops that have joined. Each one is verified and will be alerted if someone needs help nearby.</p>
+      <div class="card" id="spotlist"></div>
+    </section>
+    <!-- CIRCLE -->
+    <section class="view" id="v-circle">
+      <h2>Your circle</h2>
+      <p>These people can follow your walks and get alerts.</p>
+      <div class="card">
+        <div class="row"><div class="av">M</div><div>Mom<small>Always notified</small></div><div class="r">Active</div></div>
+        <div class="row"><div class="av">R</div><div>Riya<small>Roommate</small></div><div class="r">Active</div></div>
+        <div class="row"><div class="av">A</div><div>Aman<small>Friend, 400 m away</small></div><div class="r">Active</div></div>
+      </div>
+      <button class="btn ghost" id="addc">Add someone</button>
+      <div class="card" style="margin-top:12px"><div class="row" style="padding-top:0"><div>Share location only during a walk or alert<small>You control this anytime</small></div><div class="r">On</div></div><div class="row"><div>Voice and motion checks stay on this phone<small>Nothing is recorded</small></div><div class="r">On</div></div></div>
+    </section>
+    <!-- OWNER -->
+    <section class="view" id="v-owner">
+      <div id="owner-body"></div>
+    </section>
+  </main>
+
+  <!-- ARE YOU OKAY -->
+  <div id="ask" role="alertdialog" aria-label="Are you okay?">
+    <h2 style="font-size:30px">Are you okay?</h2>
+    <p>You stopped off your route. If you don't answer, we'll alert your circle and nearby helpers.</p>
+    <div class="ring" id="cnt">15</div>
+    <div class="spacer"></div>
+    <button class="btn" id="okb">I'm okay</button>
+    <button class="btn red" id="helpb">I need help</button>
+  </div>
+
+  <nav id="tabs">
+    <button class="on" data-t="walk"><i>🚶</i>Walk</button>
+    <button data-t="spots"><i>📍</i>Safe Spots</button>
+    <button data-t="circle"><i>👥</i>Circle</button>
+    <button data-t="owner"><i>🏪</i>Shop view</button>
+  </nav>
+</div>
+
+<script>
+(function(){
+var $=function(s){return document.querySelector(s)};
+var SP=[{n:"Sharma Medicals",x:30,y:225,k:"Pharmacy"},{n:"Gupta Tea Stall",x:105,y:150,k:"Tea stall"},{n:"Campus ATM Kiosk",x:200,y:100,k:"ATM with guard"},{n:"Raju Grocery",x:190,y:250,k:"Grocery"}];
+var dest="Hostel Gate 4",mode="idle",p=0,t0=0,altT=0,aX=0,aY=0,spot=null,fired=false,cd=null,raf=null,tmr=[];
+var rt=$("#rt"),L=rt.getTotalLength(),me=$("#me"),rtd=$("#rtd");
+var pins=$("#pins");
+SP.forEach(function(s,i){pins.insertAdjacentHTML("beforeend",'<g id="sp'+i+'"><circle cx="'+s.x+'" cy="'+s.y+'" r="12" fill="#F2A33A" stroke="#fff" stroke-width="2.5"/><text x="'+s.x+'" y="'+(s.y+4)+'" font-size="12" font-weight="800" text-anchor="middle" fill="#12262B">S</text></g>')});
+function toast(m){var t=$("#toast");t.textContent=m;t.classList.add("on");setTimeout(function(){t.classList.remove("on")},2600)}
+function buzz(){try{navigator.vibrate&&navigator.vibrate([250,120,250])}catch(e){}}
+function later(f,ms){tmr.push(setTimeout(f,ms))}
+function clear(){tmr.forEach(clearTimeout);tmr=[];clearInterval(cd);cancelAnimationFrame(raf)}
+function place(x,y){me.setAttribute("cx",x);me.setAttribute("cy",y)}
+function d(a,b,c,e){return Math.round(Math.hypot(a-c,b-e)*0.9)}
+function nearest(x,y){var b=0,bd=1e9;SP.forEach(function(s,i){var v=d(x,y,s.x,s.y);if(v<bd){bd=v;b=i}});return b}
+
+function renderIdle(){
+  mode="idle";p=0;fired=false;spot=null;
+  $("#hdr").textContent="Ready";$("#rad").style.display="none";me.setAttribute("fill","#0E7C7B");
+  rtd.setAttribute("stroke-dasharray","0 "+L);var s=rt.getPointAtLength(0);place(s.x,s.y);
+  SP.forEach(function(_,i){$("#sp"+i).style.opacity=1});
+  $("#walk-top").innerHTML='<h2>Where are you headed?</h2><p>Start a walk and your circle can follow along.</p>';
+  $("#walk-ctl").innerHTML='<div class="lbl">Going to</div><div class="chips" id="dch"></div><div class="lbl">Following your walk</div><div class="chips"><span class="chip sel">Mom</span><span class="chip sel">Riya</span><span class="chip sel">Aman</span></div><p style="margin-top:14px">Safe Spots on this route: <b>3</b> · About 6 min</p><button class="btn" id="go">Start walk</button>';
+  ["Hostel Gate 4","Library","Metro station"].forEach(function(n){var c=document.createElement("button");c.className="chip"+(n===dest?" sel":"");c.textContent=n;c.onclick=function(){dest=n;document.querySelectorAll("#dch .chip").forEach(function(e){e.classList.toggle("sel",e===c)})};$("#dch").appendChild(c)});
+  $("#go").onclick=startWalk;
+}
+function startWalk(){
+  mode="walking";t0=performance.now();$("#hdr").textContent="Walking";
+  $("#walk-top").innerHTML='<div class="pill"><span class="dot"></span>Circle is watching live</div><h2>Walking to '+dest+'</h2><p id="eta">About 6 min left</p>';
+  $("#walk-ctl").innerHTML='<div class="card"><div class="row" style="padding-top:0"><div class="av amber">S</div><div>Next Safe Spot<small id="nx">Sharma Medicals · 40 m ahead</small></div></div><div class="row"><div class="av">👥</div><div>3 people can see you<small>Mom, Riya, Aman</small></div></div></div><button class="btn ghost" id="endw">End walk</button>';
+  $("#endw").onclick=function(){clear();toast("Walk ended. Circle notified you arrived.");renderIdle()};
+  toast("Walk started. Your circle is following.");
+  loop();later(function(){if(mode==="walking"&&!fired)triggerAsk()},11000);
+}
+function loop(){
+  raf=requestAnimationFrame(function f(now){
+    if(mode==="walking"){p=Math.min(0.38,(now-t0)/32000);var pt=rt.getPointAtLength(p*L);place(pt.x,pt.y);rtd.setAttribute("stroke-dasharray",(p*L)+" "+L)}
+    else if(mode==="alert"){var q=Math.min(1,(now-altT)/16000);var x=aX+(spot.x-aX)*q,y=aY+(spot.y-aY)*q;place(x,y);var dist=d(x,y,spot.x,spot.y);var el=$("#dist");if(el)el.textContent=dist+" m";if(q>=1){arrive();return}}
+    raf=requestAnimationFrame(f)});
+}
+$("#map").addEventListener("click",function(){if(mode==="walking"&&!fired)triggerAsk()});
+function triggerAsk(){
+  fired=true;mode="ask";cancelAnimationFrame(raf);
+  var pt=rt.getPointAtLength(p*L);aX=pt.x;aY=pt.y;
+  $("#ask").classList.add("on");buzz();var c=15;$("#cnt").textContent=c;
+  cd=setInterval(function(){c--;$("#cnt").textContent=c;if(c<=0){clearInterval(cd);startAlert()}},1000);
+}
+$("#okb").onclick=function(){clearInterval(cd);$("#ask").classList.remove("on");mode="walking";t0=performance.now()-p*32000;toast("Glad you're okay. Walk continues.");loop()};
+$("#helpb").onclick=function(){clearInterval(cd);startAlert()};
+function startAlert(){
+  $("#ask").classList.remove("on");mode="alert";buzz();
+  spot=SP[nearest(aX,aY)];altT=performance.now();
+  $("#hdr").textContent="Alert active";me.setAttribute("fill","#D64545");
+  var r=$("#rad");r.setAttribute("cx",aX);r.setAttribute("cy",aY);r.style.display="";
+  $("#walk-top").innerHTML='<div class="pill red"><span class="dot"></span>Help is on the way</div>';
+  $("#walk-ctl").innerHTML='<div class="card"><div class="row" style="padding-top:0"><div class="av amber">S</div><div>Go to '+spot.n+'<small>'+spot.k+' · owner has been told</small></div><div class="r big" style="font-size:22px" id="dist">'+d(aX,aY,spot.x,spot.y)+' m</div></div></div><div class="card" id="resp"></div><a class="btn red" style="display:block;text-align:center;text-decoration:none" href="tel:112">Call 112</a><button class="btn ghost" id="safe">I\'m safe now</button>';
+  $("#safe").onclick=function(){clear();toast("Alert cancelled. Everyone has been told you're safe.");renderIdle();renderOwner()};
+  var rs=[["Mom","Notified · watching live your location","M"],[spot.n+" owner","Seen your alert · stepping outside","S"],["Volunteer Priya","120 m away · on the way","P"],["Riya","Notified · calling you","R"]];
+  rs.forEach(function(x,i){later(function(){var e=$("#resp");if(e)e.insertAdjacentHTML("beforeend",'<div class="row"><div class="av'+(i===1?" amber":"")+'">'+x[2]+'</div><div>'+x[0]+'<small>'+x[1].replace("watching live your","watching your live")+'</small></div><div class="r">✓</div></div>')},1200+i*1800)});
+  renderOwner();loop();
+}
+function arrive(){
+  mode="safe";$("#hdr").textContent="Safe";me.setAttribute("fill","#0E7C7B");$("#rad").style.display="none";
+  $("#walk-top").innerHTML='<div class="pill"><span class="dot"></span>You reached a Safe Spot</div><h2>You\'re at '+spot.n+'</h2><p>The owner is with you. Your circle and volunteers can see you are safe.</p>';
+  $("#walk-ctl").innerHTML='<div class="card"><div class="row" style="padding-top:0"><div class="av amber">S</div><div>'+spot.n+'<small>Verified Safe Spot</small></div></div><div class="row"><div class="av">👥</div><div>Mom, Riya, Aman<small>Updated: you are safe</small></div></div></div><button class="btn" id="fin">Done</button>';
+  $("#fin").onclick=function(){clear();renderIdle();renderOwner()};renderOwner();
+}
+function renderOwner(){
+  var b=$("#owner-body");
+  if(mode==="alert"||mode==="safe"&&spot){
+    var nm=spot?spot.n:"Sharma Medicals";
+    b.innerHTML='<h2>'+nm+'</h2><p>Safe Spot owner view</p>'+(mode==="alert"?'<div class="alert"><b>Someone may need help near Gate 2</b><p>'+(spot?d(aX,aY,spot.x,spot.y):90)+' m from your shop · just now</p></div><div class="card"><div class="row" style="padding-top:0"><div>2 other helpers are responding<small>Volunteer Priya · 120 m away</small></div></div></div><button class="btn" id="step">I\'m stepping outside</button>':'<div class="card"><div class="row" style="padding:0"><div>Alert resolved<small>The person reached your shop safely. Thank you.</small></div></div></div>');
+    var s=$("#step");if(s)s.onclick=function(){s.textContent="You are responding";s.disabled=true;toast("Your response was shared with the circle.")};
+  }else{b.innerHTML='<h2>Sharma Medicals</h2><p>Safe Spot owner view</p><div class="card"><div class="row" style="padding:0"><div>No alerts nearby<small>You will get a silent alert here if someone within 200 m needs help.</small></div></div></div><div class="card"><div class="row" style="padding-top:0"><div>Verified Safe Spot<small>Sticker placed at the door</small></div><div class="r">Active</div></div><div class="row"><div>Alerts handled this month<small>2 resolved</small></div></div></div>'}
+}
+function renderSpots(){
+  var h="";SP.forEach(function(s,i){h+='<div class="row"><div class="av amber">S</div><div>'+s.n+'<small>'+s.k+' · open till '+(i%2?"11 pm":"10 pm")+'</small></div><div class="r">'+(40+i*55)+' m</div></div>'});
+  $("#spotlist").innerHTML=h;
+}
+$("#addc").onclick=function(){toast("Invite sent. They'll join your circle once they accept.")};
+document.querySelectorAll("#tabs button").forEach(function(b){b.onclick=function(){
+  document.querySelectorAll("#tabs button").forEach(function(x){x.classList.toggle("on",x===b)});
+  document.querySelectorAll(".view").forEach(function(v){v.classList.toggle("on",v.id==="v-"+b.dataset.t)});
+  if(b.dataset.t==="owner")renderOwner()}});
+renderSpots();renderIdle();renderOwner();
+})();
+</script>
+</body>
+</html>
